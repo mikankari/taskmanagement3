@@ -1,0 +1,52 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title taskmanagement
+        link(rel="stylesheet", href="./bootstrap.min.css")
+        script(src="./vue.global.prod.js")
+        script(src="./index.js" defer)
+    body
+        #taskmanagement
+            .bottom-panel.vert-resizable.top-resizer
+                .toolbar.simple-toolbar-layout
+                    div
+                        .btn-group
+                            button(@click="isShownCreatingModal = true").btn.small Add creating
+                            button(@click="isShownReviewModal = true").btn.small Add review
+                        .btn-group
+                            button(@click="reload").btn.small Reload
+                            button(@click="isShowAll = ! isShowAll").btn.small Show all
+                    div(style="position: absolute; right: 0; top: 0;")
+                        .btn-group
+                            button.btn.small(@click="copy") Copy
+                            button.btn.small(@click="writeDiary") Write diary
+                .scrollable.resizable-content.table-container
+                    table.bottom-panel-table.table.table-striped.table-condensed.row-highlight
+                        tr(
+                            v-for="item, index in tasks"
+                            v-show="item.progressable || isShowAll"
+                        )
+                            td
+                                .btn-group
+                                    button(@click="checkout(item)").btn.btn-mini Checkout
+                                    button(@click="openEditor(item)").btn.btn-mini Open Editor
+                                    button(@click="openPR(item)").btn.btn-mini Open PR
+                            td
+                                span {{ item.title }}
+                                | &nbsp;
+                                span(v-if="index == checkedoutIndex").label.label-info HEAD
+                                | &nbsp;
+                                template(v-if="item.refs")
+                                    span(v-if="item.refs.priority === 1").label.label-warning Higher
+                                    span(v-if="item.refs.priority === 2").label.label-important Urgent
+                                    span(v-if="item.refs.priority === -1").label.label-default Lower
+                            td
+                                span(v-if="item.todos[item.currentIndex]") {{ item.todos[item.currentIndex].name }}
+                                span(v-else) ＼ｵﾜﾀ／
+                            td
+                                span(v-if="item.refs") {{ item.refs.dueDateFromNow }}
+            template(v-if="isShownCreatingModal")
+                include add-creating-dialog.pug
+            template(v-if="isShownReviewModal")
+                include add-review-dialog.pug

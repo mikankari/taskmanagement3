@@ -1,0 +1,19 @@
+.modal
+    .modal-dialog
+        form(@submit.prevent="submitCreating")
+            .modal-header
+                h2.dialog-title Create PR
+            .modal-body
+                label Repository
+                select(name="repo").input-block-level
+                    option(v-for="dir, repo in directories", :value="repo") {{ repo }}
+                label refs
+                input(type="number" name="refs[number]" autofocus).input-block-level
+                label HEAD branch
+                input(type="text" name="head").input-block-level
+                label Base branch
+                input(type="text" name="base" value="master").input-block-level
+            .modal-footer
+                button(type="button", @click="isShownCreatingModal = false").btn.dialog-button.left.cancel Cancel
+                button(type="submit").btn.dialog-button.btn-primary.save Create
+.modal-backdrop

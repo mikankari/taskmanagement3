@@ -1,0 +1,12 @@
+.modal
+    .modal-dialog
+        form(@submit.prevent="submitReview")
+            .modal-header
+                h2.dialog-title Add review
+            .modal-body
+                label PR URL
+                input(type="url" name="url" autofocus).input-block-level
+            .modal-footer
+                button(type="button", @click="isShownReviewModal = false").btn.dialog-button.left.cancel Cancel
+                button(type="submit").btn.dialog-button.btn-primary.save Add
+.modal-backdrop

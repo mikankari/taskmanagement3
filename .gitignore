@@ -1,0 +1,7 @@
+.DS_Store
+*.js
+*.html
+config.json
+tasks.json
+node_modules/
+templates/
