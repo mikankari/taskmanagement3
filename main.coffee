@@ -3,13 +3,12 @@ _domain_path = "./"
 _config = require "#{_domain_path}config.json"
 Load = require "#{_domain_path}js/core/load.js"
 PullRequest = require "#{_domain_path}js/input/pull-request.js"
-Issue = require "#{_domain_path}js/input/issue.js"
-Redmine = require "#{_domain_path}js/input/redmine.js"
 Checkout = require "#{_domain_path}js/core/checkout.js"
 Diary = require "#{_domain_path}js/output/diary.js"
 Save = require "#{_domain_path}js/core/save.js"
 Publish = require "#{_domain_path}js/core/publish.js"
 ChildPorcess = require "child-process-promise"
+refer = require "./modules/refer.js"
 
 app.whenReady().then ->
     new BrowserWindow {
@@ -28,11 +27,11 @@ getTasks = ->
         Promise.all tasks.map (item) -> PullRequest item, _config
     .then (tasks) ->
         Promise.all tasks.map (item) ->
-            switch item.repo
-                when "mikankari/test1"
-                    Issue item, _config
-                else
-                    item
+            if item.refs?
+                refer item.refs.url
+                    .then (refs) -> item.refs = refs; item
+            else
+                item
     .then (tasks) ->
         tasks.sort (a, b) -> a.refs?.dueDate - b.refs?.dueDate or a.createdAt - b.createdAt
     .then (tasks) ->
@@ -64,16 +63,11 @@ ipcMain.handle "add-creating", (event, payload) ->
             base: payload.base
         }
     .then (task) ->
-        return task if not payload.refs?.number
-
-        task.refs = {
-            number: payload.refs.number
-        }
-        switch task.repo
-            when "mikankari/test1"
-                Issue task, _config
-            else
-                item
+        if payload.refs.url?
+            refer payload.refs.url
+                .then (refs) -> task.refs = refs; task
+        else 
+            task
     .then (task) ->
         Checkout task, _config.directories
     .then (task) ->

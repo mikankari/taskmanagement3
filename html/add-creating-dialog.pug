@@ -7,8 +7,8 @@
                 label Repository
                 select(name="repo").input-block-level
                     option(v-for="dir, repo in directories", :value="repo") {{ repo }}
-                label refs
-                input(type="number" name="refs[number]" autofocus).input-block-level
+                label refs URL
+                input(type="url" name="refs[url]" autofocus).input-block-level
                 label HEAD branch
                 input(type="text" name="head").input-block-level
                 label Base branch

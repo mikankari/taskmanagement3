@@ -26,10 +26,10 @@ module.exports = (task, config) ->
         task.createdAt = Moment pr.created_at
             .valueOf()
 
-        refsMatch = pr.title.match /(refs|issue) #(\d+) /
-        task.refs = {
-            number: refsMatch[2]
-        } if refsMatch?
+        refsMatch = pr.body.match /https?\:\/\/\S+/
+        task.refs = if refsMatch? then {
+            url: refsMatch[0]
+        }
 
         if task.type is "created"
             todosMatch = pr.body.match /\- \[([ x])\] (.*)/g

@@ -18,7 +18,7 @@ module.exports = (task, config, templateDir) ->
             FileSystem.readFile "#{templateDir}/#{task.repo}.md", {encoding: "utf8"}, (error, data) ->
                 resolve if error? then "" else data
     .then (data) ->
-        title = if task.refs?.number? then "[WIP] refs ##{task.refs.number} #{task.refs.title}" else "[WIP] Untitled"
+        title = if task.refs? then "[WIP] resolves #{task.refs.title}" else "[WIP] Untitled"
         body = data.replace /{{\s*?([\w\.]+)\s*}}/g, (match, $1) ->
             $1.split "."
                 .reduce ((current, key) -> current[key] or []), task

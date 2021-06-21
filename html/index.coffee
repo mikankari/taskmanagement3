@@ -35,7 +35,7 @@ Vue.createApp {
                 repo: event.target.elements.namedItem "repo"
                     .value
                 refs: {
-                    number: event.target.elements.namedItem "refs[number]"
+                    url: event.target.elements.namedItem "refs[url]"
                         .value
                 }
                 head: event.target.elements.namedItem "head"
