@@ -6,6 +6,7 @@ Vue.createApp {
         isShowAll: false
         isShownCreatingModal: false
         isShownReviewModal: false
+        isShownOtherModal: false
         checkedoutIndex: -1
     }
     methods: {
@@ -55,6 +56,21 @@ Vue.createApp {
                     .value
             }
                 .then () -> window.alert "Done"
+                .catch (error) -> window.alert error
+
+        submitOther: (event) ->
+            @isShownOtherModal = false
+            return if event.submitter.classList.contains "cancel"
+
+            window.ipcRenderer.invoke "add-other", {
+                title: event.target.elements.namedItem "title"
+                    .value
+                refs: {
+                    dueDate: event.target.elements.namedItem "refs[dueDate]"
+                        .value
+                }
+            }
+                .then -> window.alert "Done"
                 .catch (error) -> window.alert error
 
         copy: ->

@@ -48,20 +48,17 @@ module.exports = (tasks, config, templateDir) ->
                 ret.join "\n"
             diaryParams = {
                 currentDate: Moment().format "YYYY/MM/DD"
-                otherTasks: []
+                otherTasks: renderTasks tasks.filter (item) -> item.type is "other"
                 withHeaders: []
                 comments: []
                 createdTasks: renderTasks tasks.filter (item) -> item.type is 'created'
-                reviewTasks: renderTasks tasks.filter (item) -> item.type isnt "created"
+                reviewTasks: renderTasks tasks.filter (item) -> item.type is "review"
             }
             for item in data.messages?.reverse() when item.user is config.slack.user
-                if item.text.match /\- \[[ x]\] /
-                    diaryParams.otherTasks.push item.text.replace /\n/g, "  \n"
-                else if item.text.match /^##/
+                if item.text.match /^##/
                     diaryParams.withHeaders.push item.text + "\n"
-                else
+                else if (tasks.every (task) -> item.ts isnt task.number)
                     diaryParams.comments.push "- " + item.text.replace /\n/g, "  \n"
-            diaryParams.otherTasks = diaryParams.otherTasks.join "\n"
             diaryParams.withHeaders = diaryParams.withHeaders.join "\n"
             diaryParams.comments = diaryParams.comments.join "\n"
 

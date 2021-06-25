@@ -8,6 +8,7 @@ Diary = require "#{_domain_path}js/output/diary.js"
 Save = require "#{_domain_path}js/core/save.js"
 Publish = require "#{_domain_path}js/core/publish.js"
 ChildPorcess = require "child-process-promise"
+OtherTask = require "./modules/other-task.js"
 refer = require "./modules/refer.js"
 
 app.whenReady().then ->
@@ -24,10 +25,16 @@ getTasks = ->
     .then ->
         Load "#{_domain_path}tasks.json"
     .then (tasks) ->
-        Promise.all tasks.map (item) -> PullRequest item, _config
+        Promise.all tasks.map (item, index) ->
+            switch item.type
+                when "created", "review"
+                    PullRequest item, _config
+                when "other"
+                    tasks[index] = new OtherTask item
+                        .reload()
     .then (tasks) ->
         Promise.all tasks.map (item) ->
-            if item.refs?
+            if item.refs? and item.type isnt "other"
                 refer item.refs.url
                     .then (refs) -> item.refs = refs; item
             else
@@ -101,6 +108,18 @@ ipcMain.handle "add-review", (event, payload) ->
         .then (currentTasks) ->
             return if currentTasks.some (item) -> item.type is "review" and item.repo is task.repo and item.number is task.number
 
+            currentTasks.push task
+            Save "#{_domain_path}tasks.json", currentTasks
+
+ipcMain.handle "add-other", (event, payload) ->
+    Promise.resolve()
+    .then ->
+        OtherTask.create payload
+    .then (task) ->
+        Promise.resolve()
+        .then ->
+            Load "#{_domain_path}tasks.json"
+        .then (currentTasks) ->
             currentTasks.push task
             Save "#{_domain_path}tasks.json", currentTasks
 
