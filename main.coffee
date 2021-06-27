@@ -4,12 +4,12 @@ _config = require "#{_domain_path}config.json"
 Load = require "#{_domain_path}js/core/load.js"
 PullRequest = require "#{_domain_path}js/input/pull-request.js"
 Checkout = require "#{_domain_path}js/core/checkout.js"
-Diary = require "#{_domain_path}js/output/diary.js"
 Save = require "#{_domain_path}js/core/save.js"
 Publish = require "#{_domain_path}js/core/publish.js"
 ChildPorcess = require "child-process-promise"
 OtherTask = require "./modules/other-task.js"
 refer = require "./modules/refer.js"
+writeDaily = require "./modules/write-daily.js"
 
 app.whenReady().then ->
     new BrowserWindow {
@@ -126,7 +126,7 @@ ipcMain.handle "add-other", (event, payload) ->
 ipcMain.handle "write-diary", ->
     getTasks()
     .then (tasks) ->
-        Diary tasks, _config, "#{_domain_path}templates"
+        writeDaily tasks
     .then (tasks) ->
         tasks.filter (item) -> item.currentIndex < item.todos.length
     .then (tasks) ->
