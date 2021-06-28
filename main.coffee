@@ -5,8 +5,8 @@ Load = require "#{_domain_path}js/core/load.js"
 PullRequest = require "#{_domain_path}js/input/pull-request.js"
 Checkout = require "#{_domain_path}js/core/checkout.js"
 Save = require "#{_domain_path}js/core/save.js"
-Publish = require "#{_domain_path}js/core/publish.js"
 ChildPorcess = require "child-process-promise"
+CreatedTask = require "./modules/created-task.js"
 OtherTask = require "./modules/other-task.js"
 refer = require "./modules/refer.js"
 writeDaily = require "./modules/write-daily.js"
@@ -27,18 +27,19 @@ getTasks = ->
     .then (tasks) ->
         Promise.all tasks.map (item, index) ->
             switch item.type
-                when "created", "review"
+                when "created"
+                    tasks[index] = new CreatedTask item
+                        .reload()
+                when "review"
                     PullRequest item, _config
                 when "other"
                     tasks[index] = new OtherTask item
                         .reload()
     .then (tasks) ->
         Promise.all tasks.map (item) ->
-            if item.refs? and item.type isnt "other"
-                refer item.refs.url
-                    .then (refs) -> item.refs = refs; item
-            else
-                item
+            return item if item.type is "created" or item.type is "other"
+            refer item.refs?.url
+                .then (refs) -> item.refs = refs; item
     .then (tasks) ->
         tasks.sort (a, b) -> a.refs?.dueDate - b.refs?.dueDate or a.createdAt - b.createdAt
     .then (tasks) ->
@@ -63,22 +64,7 @@ ipcMain.handle "open-pr", (event, task) ->
 ipcMain.handle "add-creating", (event, payload) ->
     Promise.resolve()
     .then ->
-        {
-            type: "created"
-            repo: payload.repo
-            head: payload.head
-            base: payload.base
-        }
-    .then (task) ->
-        if payload.refs.url?
-            refer payload.refs.url
-                .then (refs) -> task.refs = refs; task
-        else 
-            task
-    .then (task) ->
-        Checkout task, _config.directories
-    .then (task) ->
-        Publish task, _config, "#{_domain_path}templates"
+        CreatedTask.create payload
     .then (task) ->
         Promise.resolve()
         .then ->
