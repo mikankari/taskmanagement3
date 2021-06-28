@@ -38,7 +38,7 @@ class CreatedTask implements Task {
             uri: "https://api.github.com/repos/" + this.repo + "/pulls/" + this.number,
             headers: {
                 "User-Agent": "taskmanagement v3",
-                "Authorization": "token " + config.github.access_token,
+                "Authorization": "token " + config.github.token,
             },
             json: true,
         })
@@ -111,7 +111,7 @@ class CreatedTask implements Task {
             uri: "https://api.github.com/repos/" + payload.repo + "/pulls",
             headers: {
                 "User-Agent": "taskmanagement v3",
-                "Authorization": "token " + config.github.access_token,
+                "Authorization": "token " + config.github.token,
             },
             body: {
                 title: refs

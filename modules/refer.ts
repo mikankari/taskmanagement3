@@ -12,7 +12,7 @@ const loadFromGitHub = async (repo: string, number: string): Promise<Refs> => {
         uri: "https://api.github.com/repos/" + repo + "/issues/" + number,
         headers: {
             "User-Agent": "taskmanagement v3",
-            "Authorization": "token " + config.github.access_token,
+            "Authorization": "token " + config.github.token,
         },
         json: true,
     })
