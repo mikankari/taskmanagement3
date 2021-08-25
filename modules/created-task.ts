@@ -99,12 +99,13 @@ class CreatedTask implements Task {
         await exec("git commit --allow-empty -m \"Draft 用の空コミット\"")
         await exec("git push origin " + payload.head)
 
-        let template: string
-        try {
-            template = await util.promisify(fileSystem.readFile)("./templates/" + payload.repo + ".md", { encoding: "utf8" })
-        } catch (e) {
-            template = ""
-        }
+        let template: string = await util.promisify(fileSystem.readFile)(
+            "./templates/" + payload.repo + ".md",
+            {
+                encoding: "utf8",
+                flag: "a+", // 初期に空ファイルを作る
+            }
+        )
 
         const refs = await refer(payload.refs.url)
 

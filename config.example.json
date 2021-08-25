@@ -1,0 +1,31 @@
+{
+    "github": {
+        "token": "ghp_**",
+        "user": "octocat"
+    },
+    "redmine": {
+        "baseUrl": "https://example.com/redmine/",
+        "token": ""
+    },
+    "trello": {
+        "key": "",
+        "token": "",
+        "idList": ""
+    },
+    "docbase": {
+        "domain": "example.docbase.io",
+        "token": ""
+    },
+    "slack": {
+        "token": "**-**-**-**-**",
+        "channel": "C**",
+        "user": "U**"
+    },
+    "directories": {
+        "mikankari/test1": "/Users/mikankari/Desktop/test1"
+    },
+    "daily": {
+        "type": "file",
+        "path": "/Users/mikankari/Downloads"
+    }
+}

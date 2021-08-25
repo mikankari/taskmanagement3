@@ -113,6 +113,9 @@ class ReviewTask implements Task {
         if (! match) {
             throw "not review of github"
         }
+        if (config.directories[match[1]] === undefined) {
+            throw "not found config. please add config directories"
+        }
 
         return new ReviewTask({
             number: match[2],
