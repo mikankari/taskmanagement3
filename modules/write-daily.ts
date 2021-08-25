@@ -108,9 +108,49 @@ const writeToDocBase = async (tasks: Task[]): Promise<Task[]> => {
     return tasks
 }
 
+const writeToFile = async (tasks: Task[]): Promise<Task[]> => {
+    const renderTasks = (tasks: Task[]): string => {
+        const ret = []
+        for (let task of tasks) {
+            if (task.type === "review" && ! task.progressable) {
+                continue
+            }
+            ret.push(task.title)
+            if (task.previousIndex < task.currentIndex) {
+                for (let progress of task.todos.slice(task.previousIndex, task.currentIndex)) {
+                    ret.push('- [' + progress.isDone + '] ' + progress.name)
+                }
+            }
+            if (task.currentIndex < task.todos.length) {
+                const current = task.todos[task.currentIndex]
+                ret.push('- [' + current.isDone + '] ' + current.name)
+            }
+            ret.push('')
+        }
+        return ret.join("\n")
+    }
+
+    const body = []
+    for (let key of ["created", "review", "other"]) {
+        body.push('## ' + key)
+        body.push('')
+        body.push(renderTasks(tasks.filter((item) => item.type === key)))
+        body.push('')
+    }
+    await util.promisify(fileSystem.writeFile)(
+        config.daily.path + "/daily " + moment().format("YYYY-MM-DD") + ".md",
+        body.join("\n"),
+        { encoding: "utf8" }
+    )
+
+    return tasks
+}
+
 module.exports = (tasks: Task[]): Promise<Task[]> => {
     if (config.daily.type === "docbase") {
         return writeToDocBase(tasks)
+    } else if (config.daily.type === "file") {
+        return writeToFile(tasks)
     } else {
         throw "unsupported config daily.type " + config.daily.type
     }
