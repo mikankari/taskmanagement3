@@ -64,12 +64,8 @@ const writeToDocBase = async (tasks: Task[]): Promise<Task[]> => {
         throw comments.error
     }
 
-    let template: string
-    try {
-        template = await util.promisify(fileSystem.readFile)("./templates/daily.md", { encoding: "utf8" })
-    } catch {
-        template = ""
-    }
+    let template: string = await util.promisify(fileSystem.readFile)("./templates/daily.md", { encoding: "utf8" })
+
     const templateParam = {
         currentDate: moment().format("YYYY/MM/DD"),
         createdTasks: renderTasks(tasks.filter((item) => item.type === "created")),
@@ -140,7 +136,10 @@ const writeToFile = async (tasks: Task[]): Promise<Task[]> => {
     await util.promisify(fileSystem.writeFile)(
         config.daily.path + "/daily " + moment().format("YYYY-MM-DD") + ".md",
         body.join("\n"),
-        { encoding: "utf8" }
+        {
+            encoding: "utf8",
+            flag: "wx", // 上書きを防ぐ
+        }
     )
 
     return tasks

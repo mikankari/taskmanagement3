@@ -64,12 +64,7 @@ class Tasks {
     }
 
     static async load(): Promise<Tasks> {
-        let tasks: any[];
-        try {
-            tasks = JSON.parse(await util.promisify(fileSystem.readFile)("./tasks.json", { encoding: "utf8" })) || []
-        } catch {
-            tasks = []
-        }
+        const tasks: any[] = JSON.parse(await util.promisify(fileSystem.readFile)("./tasks.json", { encoding: "utf8" })) || []
 
         return await new Tasks(tasks.map((item) => {
             switch (item.type) {

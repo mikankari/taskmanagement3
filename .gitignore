@@ -4,4 +4,6 @@
 config.json
 tasks.json
 node_modules/
-templates/
+templates/*
+!templates/daily.example.md
+!templates/mikankari/test1.md
