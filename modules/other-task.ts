@@ -2,6 +2,7 @@
 const childProcess = require("child_process")
 const moment = require("moment")
 moment.locale("ja")
+const refer = require("./refer.js")
 const request = require("request-promise")
 const util = require("util")
 
@@ -14,61 +15,67 @@ class OtherTask implements Task {
     number: string
     title!: string
     url: string
-    createdAt!: number
+    createdAt: number
     refs?: Refs
     todos!: { name: string, isDone: " " | "x" }[]
     currentIndex!: number
     previousIndex: number
     progressable!: boolean
 
-    constructor(payload: { number: string, previousIndex: number, url: string }) {
+    constructor(payload: { number: string, previousIndex: number, url: string, createdAt: number }) {
         this.type = "other"
         this.number = payload.number
         this.previousIndex = payload.previousIndex
         this.url = payload.url
+        this.createdAt = payload.createdAt
     }
 
     async reload(): Promise<this> {
-        const data = await request({
-            uri: "https://slack.com/api/conversations.history",
+        const card = await request({
+            uri: "https://api.trello.com/1/cards/" + this.number,
             headers: {
                 "User-Agent": "taskmanagement v3",
-                "Authorization": "Bearer " + config.slack.token,
+                "Authorization": 'OAuth oauth_consumer_key="' + config.trello.key + '", oauth_token="' + config.trello.token + '"',
             },
             qs: {
-                channel: config.slack.channel,
-                latest: this.number,
-                inclusive: true,
-                limit: 1,
+                fields: "name,desc,due",
+                checklists: "all",
             },
             json: true,
         })
-        if (! data.ok) {
-            throw data.error
-        }
 
-        const matches = data.messages[0]?.text.match(/\- \[([ x])\] ([^ ]*)( (\d{4}-\d{2}-\d{2}) まで)?/)
-        const dueDate = matches?.[4] && moment(matches[4])
+        this.title = card.name
 
-        this.title = matches?.[2]
-        this.createdAt = moment(data.messages[0]?.ts, "X").valueOf()
-        this.refs = {
-            title: this.title,
-            dueDate: dueDate?.valueOf(),
-            dueDateFromNow: dueDate?.fromNow(),
-            priority: 0,
-        }
-        this.todos = [
-            {
-                name: this.title,
-                isDone: matches?.[1],
+        const refsMatch = card.desc.match(/https?\:\/\/\S+/)
+        this.refs = await refer(refsMatch?.[0])
+
+        if (this.refs?.dueDate === undefined) {
+            if (this.refs === undefined) {
+                this.refs = {
+                    title: this.title,
+                    priority: 0,
+                }
             }
-        ]
+            const dueDate = card.due && moment(card.due)
+            this.refs.dueDate = dueDate?.valueOf()
+            this.refs.dueDateFromNow = dueDate?.fromNow()
+        }
+
+        this.todos = (card.checklists[0].checkItems as any[])
+            .sort((a, b) => a.pos - b.pos)
+            .map((item) => {
+                return {
+                    name: item.name,
+                    isDone: item.state === "complete" ? "x" : " ",
+                }
+            })
         this.currentIndex = this.todos.findIndex((todo) => todo.isDone === " ")
         if (this.currentIndex === -1) {
             this.currentIndex = this.todos.length
+            this.progressable = false
+        } else {
+            this.progressable = ! this.todos[this.currentIndex].name.match(/(完了|受け取り)( ＼ｵﾜﾀ／)?$/)
         }
-        this.progressable = this.currentIndex < this.todos.length
 
         return this
     }
@@ -89,28 +96,61 @@ class OtherTask implements Task {
         return this
     }
 
-    static async create(payload: { title: string, refs: { dueDate: string } }): Promise<OtherTask> {
-        const message = await request({
+    static async create(payload: { refs: { dueDate: string, url: string }, todos: string }): Promise<OtherTask> {
+        const refs = await refer(payload.refs.url)
+
+        const card = await request({
             method: "POST",
-            uri: "https://slack.com/api/chat.postMessage",
+            uri: "https://api.trello.com/1/cards",
             headers: {
                 "User-Agent": "taskmanagement v3",
-                "Authorization": "Bearer " + config.slack.token,
+                "Authorization": 'OAuth oauth_consumer_key="' + config.trello.key + '", oauth_token="' + config.trello.token + '"',
             },
-            formData: {
-                channel: config.slack.channel,
-                text: "- [ ] " + payload.title + " " + (payload.refs.dueDate !== "" ? payload.refs.dueDate + " まで" : ""),
+            body: {
+                name: refs
+                    ? "Resolves " + refs.title
+                    : "Untitled",
+                desc: payload.refs.url,
+                due: payload.refs.dueDate,
+                idList: config.trello.idList,
             },
             json: true,
         })
-        if (! message.ok) {
-            throw message.error
+        const checklist = await request({
+            method: "POST",
+            uri: "https://api.trello.com/1/checklists",
+            headers: {
+                "User-Agent": "taskmanagement v3",
+                "Authorization": 'OAuth oauth_consumer_key="' + config.trello.key + '", oauth_token="' + config.trello.token + '"',
+            },
+            body: {
+                idCard: card.id,
+            },
+            json: true,
+        })
+        for (let todoName of payload.todos.split("\n")) {
+            if (todoName === "") {
+                continue
+            }
+            await request({
+                method: "POST",
+                uri: "https://api.trello.com/1/checklists/" + checklist.id + "/checkItems",
+                headers: {
+                    "User-Agent": "taskmanagement v3",
+                    "Authorization": 'OAuth oauth_consumer_key="' + config.trello.key + '", oauth_token="' + config.trello.token + '"',
+                },
+                body: {
+                    name: todoName,
+                },
+                json: true,
+            })
         }
 
         return new OtherTask({
-            number: message.ts,
+            number: card.id,
             previousIndex: 0,
-            url: "https://" + config.slack.workspace + ".slack.com/archives/" + config.slack.channel + "/p" + message.ts,
+            url: card.shortUrl,
+            createdAt: moment().valueOf(),
         })
     }
 }

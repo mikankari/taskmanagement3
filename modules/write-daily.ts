@@ -77,7 +77,7 @@ const writeToDocBase = async (tasks: Task[]): Promise<Task[]> => {
         otherTasks: renderTasks(tasks.filter((item) => item.type === "other")),
         comments: comments.messages
             .reverse()
-            .filter((comment: any) => comment.user === config.slack.user && tasks.every((task) => comment.ts !== task.number))
+            .filter((comment: any) => comment.user === config.slack.user)
             .map((comment: any) => "- " + comment.text.replace(/\n/g, "  \n"))
             .join("\n"),
     }

@@ -4,10 +4,12 @@
             .modal-header
                 h2.dialog-title Add other
             .modal-body
-                label Title
-                input(type="text" name="title" autofocus).input-block-level
+                label refs URL
+                input(type="url" name="refs[url]" autofocus).input-block-level
                 label Due date
                 input(type="date" name="refs[dueDate]").input-block-level
+                label Todos
+                textarea(name="todos" rows="3").input-block-level
             .modal-footer
                 button(type="button", @click="isShownOtherModal = false").btn.dialog-button.left.cancel Cancel
                 button(type="submit").btn.dialog-button.btn-primary.save Add

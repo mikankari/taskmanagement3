@@ -63,12 +63,14 @@ Vue.createApp {
             return if event.submitter.classList.contains "cancel"
 
             window.ipcRenderer.invoke "add-other", {
-                title: event.target.elements.namedItem "title"
-                    .value
                 refs: {
+                    url: event.target.elements.namedItem "refs[url]"
+                        .value
                     dueDate: event.target.elements.namedItem "refs[dueDate]"
                         .value
                 }
+                todos: event.target.elements.namedItem "todos"
+                    .value
             }
                 .then -> window.alert "Done"
                 .catch (error) -> window.alert error
