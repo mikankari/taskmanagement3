@@ -63,6 +63,6 @@ module.exports = async (url: string): Promise<Refs | undefined> => {
         const refs = await loadFromRedmine(matches[1])
         return Object.assign({ url }, refs)
     } else {
-        throw "unsupported refs: " + url
+        return undefined
     }
 }
