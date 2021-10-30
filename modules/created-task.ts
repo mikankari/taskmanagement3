@@ -94,7 +94,7 @@ class CreatedTask implements Task {
         const exec = (command: string): void => util.promisify(childProcess.exec)(command, { cwd: config.directories[payload.repo] })
         await exec("git fetch")
         await exec("git checkout --no-track -b " + payload.head + " origin/" + payload.base)
-        await exec("git commit --allow-empty -m \"WIP 用の空コミット\"")
+        await exec("git commit --allow-empty -m \"Draft 用の空コミット\"")
         await exec("git push origin " + payload.head)
 
         let template: string
@@ -115,8 +115,8 @@ class CreatedTask implements Task {
             },
             body: {
                 title: refs
-                    ? "[WIP] Resolves " + refs.title
-                    : "[WIP] Untitled",
+                    ? "Resolves " + refs.title
+                    : "Untitled",
                 body: template.replace(/{{\s*?([\w\.]+)\s*}}/g, (match, $1) => {
                     return $1.split(".").reduce((current: any, key: string): any => {
                         return current[key] || []
@@ -124,6 +124,7 @@ class CreatedTask implements Task {
                 }),
                 head: payload.head,
                 base: payload.base,
+                draft: true,
             },
             json: true,
         })
