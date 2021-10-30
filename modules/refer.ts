@@ -41,10 +41,11 @@ const loadFromRedmine = async (number: string): Promise<Refs> => {
         dueDateFromNow: dueDate?.fromNow(),
         priority: (() => {
             switch (data.issue.priority.id) {
-                case 3: return -1 // 低め
-                case 4: return 0 // 通常
-                case 5: return 1 // 高め
-                case 6: return 2 // 急いで
+                case 1: return -1 // 低め
+                case 2: return 0 // 通常
+                case 3: return 1 // 高め
+                case 4: return 2 // 急いで
+                case 5: return 2 // 今すぐ
                 default: return 0
             }
         })(),
