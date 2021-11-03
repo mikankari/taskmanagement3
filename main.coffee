@@ -28,9 +28,9 @@ ipcMain.handle "checkout", (event, payload) ->
     tasks.find payload
         .checkout()
 
-ipcMain.handle "open-editor", (event, payload) ->
+ipcMain.handle "open-issue", (event, payload) ->
     tasks.find payload
-        .openEditor()
+        .openIssue()
 
 ipcMain.handle "open-pr", (event, payload) ->
     tasks.find payload

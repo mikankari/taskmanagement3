@@ -86,8 +86,12 @@ class OtherTask implements Task {
         return this
     }
 
-    async openEditor(): Promise<this> {
-        return await this.openWeb()
+    async openIssue(): Promise<this> {
+        if (this.refs?.url) {
+            await util.promisify(childProcess.exec)("open " + this.refs.url)
+        }
+
+        return this
     }
 
     async openWeb(): Promise<this> {

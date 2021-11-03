@@ -16,7 +16,7 @@ export interface Task {
 
     reload(): Promise<this>
     checkout(): Promise<this>
-    openEditor(): Promise<this>
+    openIssue(): Promise<this>
     openWeb(): Promise<this>
 }
 

@@ -20,8 +20,8 @@ Vue.createApp {
                 .then => @checkedoutIndex = @tasks.indexOf task
                 .catch (error) -> window.alert error
 
-        openEditor: (task) ->
-            window.ipcRenderer.invoke "open-editor", Vue.toRaw task
+        openIssue: (task) ->
+            window.ipcRenderer.invoke "open-issue", Vue.toRaw task
                 .catch (error) -> window.alert error
 
         openPR: (task) ->

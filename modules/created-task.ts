@@ -78,8 +78,10 @@ class CreatedTask implements Task {
         return this
     }
 
-    async openEditor(): Promise<this> {
-        await util.promisify(childProcess.exec)("open -a 'visual studio code' " + config.directories[this.repo])
+    async openIssue(): Promise<this> {
+        if (this.refs?.url) {
+            await util.promisify(childProcess.exec)("open " + this.refs.url)
+        }
 
         return this
     }
