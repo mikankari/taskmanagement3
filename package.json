@@ -20,7 +20,7 @@
   "homepage": "https://github.com/mikankari/taskmanagement3#readme",
   "devDependencies": {
     "coffeescript": "^2.6.1",
-    "electron": "^13.1.2",
+    "electron": "^15.3.0",
     "pug-cli": "^1.0.0-alpha6",
     "typescript": "^4.4.4"
   },
