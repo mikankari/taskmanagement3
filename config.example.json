@@ -26,6 +26,8 @@
     },
     "daily": {
         "type": "file",
-        "path": "/Users/mikankari/Downloads"
+        "path": "/Users/mikankari/Downloads",
+        "title": "[daily ]YYYY-MM-DD[.md]",
+        "tags": ["日報", "ほげ事業部"]
     }
 }

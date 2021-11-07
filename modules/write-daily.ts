@@ -1,4 +1,5 @@
 
+const ejs = require("ejs")
 const fileSystem = require("fs")
 const moment = require("moment")
 moment.locale("ja")
@@ -9,44 +10,7 @@ const config = require("../config.json")
 
 import { Task } from "./types"
 
-const writeToDocBase = async (tasks: Task[]): Promise<Task[]> => {
-    const renderTasks = (tasks: Task[]): string => {
-        const ret = ['<ul>']
-        for (let task of tasks) {
-            if (! (task.type !== "review" || task.progressable)) {
-                continue
-            }
-            ret.push('  <li>')
-            ret.push('    <div style="font-size: 1.4rem;">')
-            ret.push('      <a href="' + task.url + '" target="_blank">' + task.title + '</a>')
-            ret.push('    </div>')
-            ret.push('    <ul>')
-            if (task.previousIndex < task.currentIndex) {
-                for (let progress of task.todos.slice(task.previousIndex, task.currentIndex)) {
-                    ret.push('      <li>[' + progress.isDone + '] ' + progress.name + '</li>')
-                }
-            }
-            if (task.currentIndex < task.todos.length) {
-                const current = task.todos[task.currentIndex]
-                ret.push('      <li>[' + current.isDone + '] ' + current.name + '</li>')
-            }
-            ret.push('    </ul>')
-            if (task.currentIndex + 1 < task.todos.length) {
-                ret.push('    <details style="margin: 0 0 1em;">')
-                ret.push('      <summary style="color: #aaa; font-size: 1.2rem;">もっと後</summary>')
-                ret.push('      <ul>')
-                for (let todo of task.todos.slice(task.currentIndex + 1)) {
-                    ret.push('        <li>[' + todo.isDone + '] ' + todo.name + '</li>')
-                }
-                ret.push('      </ul>')
-                ret.push('    </details>')
-            }
-            ret.push('  </li>')
-        }
-        ret.push('</ul>')
-        return ret.join("\n")
-    }
-
+module.exports = async (tasks: Task[]): Promise<Task[]> => {
     const comments = await request({
         uri: "https://slack.com/api/conversations.history",
         headers: {
@@ -61,96 +25,51 @@ const writeToDocBase = async (tasks: Task[]): Promise<Task[]> => {
         json: true,
     })
     if (! comments.ok) {
-        throw comments.error
-    }
-
-    let template: string = await util.promisify(fileSystem.readFile)("./templates/daily.md", { encoding: "utf8" })
-
-    const templateParam = {
-        currentDate: moment().format("YYYY/MM/DD"),
-        createdTasks: renderTasks(tasks.filter((item) => item.type === "created")),
-        reviewTasks: renderTasks(tasks.filter((item) => item.type === "review")),
-        otherTasks: renderTasks(tasks.filter((item) => item.type === "other")),
-        comments: comments.messages
-            .reverse()
-            .filter((comment: any) => comment.user === config.slack.user)
-            .map((comment: any) => "- " + comment.text.replace(/\n/g, "  \n"))
-            .join("\n"),
-    }
-    template = template.replace(/{{\s*?([\w\.]+)\s*}}/g, (match, $1) => {
-        return $1.split(".").reduce((current: any, key: string): any => {
-            return current[key] ?? []
-        }, templateParam)
-    })
-    const splited = template.split("\n")
-
-    // require("electron").clipboard.writeText(splited.slice(2).join("\n"))
-    await request({
-        method: "POST",
-        uri: "https://api.docbase.io/teams/" + config.daily.domain + "/posts",
-        headers: {
-            "User-Agent": "taskmanagement v3",
-            "X-DocBaseToken": config.daily.token,
-            "X-Api-Version": "2",
-        },
-        body: {
-            title: splited[0] || "",
-            tags: splited[1]?.split(",") || [],
-            body: splited.slice(2).join("\n"),
-        },
-        json: true,
-    })
-
-    return tasks
-}
-
-const writeToFile = async (tasks: Task[]): Promise<Task[]> => {
-    const renderTasks = (tasks: Task[]): string => {
-        const ret = []
-        for (let task of tasks) {
-            if (task.type === "review" && ! task.progressable) {
-                continue
-            }
-            ret.push(task.title)
-            if (task.previousIndex < task.currentIndex) {
-                for (let progress of task.todos.slice(task.previousIndex, task.currentIndex)) {
-                    ret.push('- [' + progress.isDone + '] ' + progress.name)
-                }
-            }
-            if (task.currentIndex < task.todos.length) {
-                const current = task.todos[task.currentIndex]
-                ret.push('- [' + current.isDone + '] ' + current.name)
-            }
-            ret.push('')
+        if (comments.error !== 'invalid_auth') {
+            throw comments.error
         }
-        return ret.join("\n")
+        comments.messages = []
     }
 
-    const body = []
-    for (let key of ["created", "review", "other"]) {
-        body.push('## ' + key)
-        body.push('')
-        body.push(renderTasks(tasks.filter((item) => item.type === key)))
-        body.push('')
-    }
-    await util.promisify(fileSystem.writeFile)(
-        config.daily.path + "/daily " + moment().format("YYYY-MM-DD") + ".md",
-        body.join("\n"),
+    const body = await ejs.renderFile(
+        "./templates/daily.md",
         {
-            encoding: "utf8",
-            flag: "wx", // 上書きを防ぐ
+            tasks,
+            comments: comments.messages
+                .filter((comment: any) => comment.user === config.slack.user)
+                .map((comment: any) => comment.text.replace(/\n/g, "  \n"))
+                .reverse(),
         }
     )
 
-    return tasks
-}
-
-module.exports = (tasks: Task[]): Promise<Task[]> => {
     if (config.daily.type === "docbase") {
-        return writeToDocBase(tasks)
+        await request({
+            method: "POST",
+            uri: "https://api.docbase.io/teams/" + config.daily.domain + "/posts",
+            headers: {
+                "User-Agent": "taskmanagement v3",
+                "X-DocBaseToken": config.daily.token,
+                "X-Api-Version": "2",
+            },
+            body: {
+                title: config.daily.title,
+                tags: config.daily.tags,
+                body,
+            },
+            json: true,
+        })
     } else if (config.daily.type === "file") {
-        return writeToFile(tasks)
+        await util.promisify(fileSystem.writeFile)(
+            config.daily.path + "/" + moment().format(config.daily.title),
+            body,
+            {
+                encoding: "utf8",
+                flag: "wx", // 上書きを防ぐ
+            }
+        )
     } else {
         throw "unsupported config daily.type " + config.daily.type
     }
+
+    return tasks
 }
