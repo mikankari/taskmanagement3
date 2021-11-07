@@ -1,6 +1,6 @@
 ## Issue
 
-resolves {{ refs.url }}
+resolves <%= refs.url %>
 
 <!--
 wants to merge into #

@@ -1,5 +1,6 @@
 
 const childProcess = require("child_process")
+const ejs = require("ejs")
 const fileSystem = require("fs")
 const moment = require("moment")
 moment.locale("ja")
@@ -120,11 +121,7 @@ class CreatedTask implements Task {
                 title: refs
                     ? "Resolves " + refs.title
                     : "Untitled",
-                body: template.replace(/{{\s*?([\w\.]+)\s*}}/g, (match, $1) => {
-                    return $1.split(".").reduce((current: any, key: string): any => {
-                        return current[key] || []
-                    }, payload)
-                }),
+                body: ejs.render(template, payload),
                 head: payload.head,
                 base: payload.base,
                 draft: true,
