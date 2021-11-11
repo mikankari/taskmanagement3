@@ -50,7 +50,12 @@ class Tasks {
     async writeDaily(): Promise<void> {
         await this.reload()
         await writeDaily(this.tasks)
-        this.tasks = this.tasks.filter((item) => item.currentIndex < item.todos.length)
+        this.tasks = this.tasks
+            .filter((item) => item.currentIndex < item.todos.length)
+            .map((item) => {
+                item.previousIndex = item.currentIndex
+                return item
+            })
         this.save()
     }
 
@@ -67,11 +72,6 @@ class Tasks {
         }
 
         return await new Tasks(tasks.map((item) => {
-            item.previousIndex = item.todos?.findIndex((todo: any) => todo.isDone === " ") ?? 0
-            if (item.previousIndex === -1) {
-                item.previousIndex = item.todo?.length ?? 0
-            }
-
             switch (item.type) {
                 case "created": return new CreatedTask(item)
                 case "review": return new ReviewTask(item)
