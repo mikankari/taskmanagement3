@@ -27,10 +27,19 @@ tasks
     .filter(function (task) {
         return task.type === "created";
     })
-    .forEach(function (task) {
+    .reduce(function (group, task) {
+        group[task.previousIndex < task.currentIndex ? 0 : 1].push(task)
+        return group
+    },[
+        [],
+        []
+    ])
+    .forEach(function (group) {
+        group.forEach(function (task) {
 %><%= task.title %>
 <% renderTodos(task) %>
 <%
+        })
     });
 %>
 
@@ -39,14 +48,25 @@ tasks
 <%
 tasks
     .filter(function (task) {
-        return task.type === "review"
-            && task.pogressable;
-            // todo
+        return task.type === "review";
     })
-    .forEach(function (task) {
+    .reduce(function (group, task) {
+        if (task.previousIndex < task.currentIndex) {
+            group[0].push(task)
+        } else if (task.progressable) {
+            group[1].push(task)
+        }
+        return group
+    },[
+        [],
+        []
+    ])
+    .forEach(function (group) {
+        group.forEach(function (task) {
 %><%= task.title %>
 <% renderTodos(task) %>
 <%
+        })
     });
 %>
 
@@ -57,10 +77,19 @@ tasks
     .filter(function (task) {
         return task.type === "other";
     })
-    .forEach(function (task) {
+    .reduce(function (current, task) {
+        current[task.previousIndex < task.currentIndex ? 0 : 1].push(task)
+        return current
+    },[
+        [],
+        []
+    ])
+    .forEach(function (group) {
+        group.forEach(function (task) {
 %><%= task.title %>
 <% renderTodos(task) %>
 <%
+        })
     });
 %>
 
