@@ -17,7 +17,7 @@ class ReviewTask implements Task {
     url!: string
     createdAt!: number
     refs?: Refs
-    todos!: { name: string, isDone: " " | "x" }[]
+    todos!: { name: string, isDone: boolean }[]
     currentIndex!: number
     previousIndex: number
     progressable!: boolean
@@ -63,19 +63,19 @@ class ReviewTask implements Task {
             .filter((review) => review.user.login === config.github.user)
             .map((review) => ({
                 name: "レビュー",
-                isDone: "x",
+                isDone: true,
             }))
         if (pr.state === "open" && (pr.requested_reviewers as any[]).some((reviewer) => reviewer.login === config.github.user)) {
             this.todos.push({
                 name: "レビュー",
-                isDone: " ",
+                isDone: false,
             })
         }
         this.todos.push({
             name: "マージなど完了",
-            isDone: pr.state !== "open" ? "x" : " "
+            isDone: pr.state !== "open"
         })
-        this.currentIndex = this.todos.findIndex((todo) => todo.isDone === " ")
+        this.currentIndex = this.todos.findIndex((todo) => ! todo.isDone)
         if (this.currentIndex === -1) {
             this.currentIndex = this.todos.length
             this.progressable = false

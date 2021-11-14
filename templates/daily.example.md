@@ -6,13 +6,13 @@ var renderTodos = function (task) {
     task.todos
         .slice(task.previousIndex, task.currentIndex)
         .forEach(function (progress) {
-%>- [<%= progress.isDone %>] <%= progress.name %>
+%>- [<%= progress.isDone ? "x" : " " %>] <%= progress.name %>
 <%
         });
 
     if (task.currentIndex < task.todos.length) {
         current = task.todos[task.currentIndex];
-%>- [<%= current.isDone %>] <%= current.name %>
+%>- [<%= current.isDone ? "x" : " " %>] <%= current.name %>
 <%
     }
 }

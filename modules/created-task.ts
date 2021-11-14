@@ -19,7 +19,7 @@ class CreatedTask implements Task {
     url!: string
     createdAt!: number
     refs?: Refs
-    todos!: { name: string, isDone: " " | "x" }[]
+    todos!: { name: string, isDone: boolean }[]
     currentIndex!: number
     previousIndex: number
     progressable!: boolean
@@ -57,10 +57,10 @@ class CreatedTask implements Task {
         this.todos = todosMatch.map((todo) => {
             return {
                 name: todo.substring(6),
-                isDone: todo.substring(3, 4) as " " | "x",
+                isDone: todo.substring(3, 4) === "x",
             }
         })
-        this.currentIndex = this.todos.findIndex((todo) => todo.isDone === " ")
+        this.currentIndex = this.todos.findIndex((todo) => ! todo.isDone)
         if (this.currentIndex === -1) {
             this.currentIndex = this.todos.length
             this.progressable = false

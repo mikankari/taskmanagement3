@@ -8,7 +8,7 @@ export interface Task {
     refs?: Refs
     todos: {
         name: string
-        isDone: " " | "x"
+        isDone: boolean
     }[]
     currentIndex: number
     previousIndex: number
@@ -25,5 +25,5 @@ export interface Refs {
     title: string
     dueDate?: number
     dueDateFromNow?: string
-    priority: number
+    priority: -1 | 0 | 1 | 2
 }

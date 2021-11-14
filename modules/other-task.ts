@@ -17,7 +17,7 @@ class OtherTask implements Task {
     url: string
     createdAt: number
     refs?: Refs
-    todos!: { name: string, isDone: " " | "x" }[]
+    todos!: { name: string, isDone: boolean }[]
     currentIndex!: number
     previousIndex: number
     progressable!: boolean
@@ -66,10 +66,10 @@ class OtherTask implements Task {
             .map((item) => {
                 return {
                     name: item.name,
-                    isDone: item.state === "complete" ? "x" : " ",
+                    isDone: item.state === "complete",
                 }
             })
-        this.currentIndex = this.todos.findIndex((todo) => todo.isDone === " ")
+        this.currentIndex = this.todos.findIndex((todo) => ! todo.isDone)
         if (this.currentIndex === -1) {
             this.currentIndex = this.todos.length
             this.progressable = false
