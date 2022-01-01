@@ -35,7 +35,7 @@ class Tasks {
     }
 
     async addReview(payload: any): Promise<void> {
-        if (this.find(payload) !== undefined) {
+        if (this.find({ type: "review", ...payload }) !== undefined) {
             throw "already exists"
         }
         this.tasks.push(await ReviewTask.create(payload))
