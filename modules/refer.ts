@@ -18,6 +18,9 @@ const loadFromGitHub = async (repo: string, number: string): Promise<Refs> => {
     })
     const dueDate = data.milestone && moment(data.milestone.due_on)
     return {
+        type: "github_issue",
+        repo,
+        number,
         title: data.title,
         dueDate: dueDate?.valueOf(),
         dueDateFromNow: dueDate?.fromNow(),
@@ -36,6 +39,8 @@ const loadFromRedmine = async (number: string): Promise<Refs> => {
     })
     const dueDate = data.issue.due_date && moment(data.issue.due_date)
     return {
+        type: "redmine",
+        number,
         title: data.issue.subject,
         dueDate: dueDate?.valueOf(),
         dueDateFromNow: dueDate?.fromNow(),

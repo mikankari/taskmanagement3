@@ -52,6 +52,8 @@ class OtherTask implements Task {
         if (this.refs?.dueDate === undefined) {
             if (this.refs === undefined) {
                 this.refs = {
+                    type: "trello",
+                    number: this.number,
                     title: this.title,
                     priority: 0,
                 }

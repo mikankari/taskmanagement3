@@ -22,6 +22,9 @@ export interface Task {
 
 export interface Refs {
     url?: string
+    type: "redmine" | "github_issue" | "trello"
+    repo?: string
+    number: string
     title: string
     dueDate?: number
     dueDateFromNow?: string
