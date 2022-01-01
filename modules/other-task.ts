@@ -52,6 +52,8 @@ class OtherTask implements Task {
         if (this.refs?.dueDate === undefined) {
             if (this.refs === undefined) {
                 this.refs = {
+                    type: "trello",
+                    number: this.number,
                     title: this.title,
                     priority: 0,
                 }
@@ -111,9 +113,16 @@ class OtherTask implements Task {
                 "Authorization": 'OAuth oauth_consumer_key="' + config.trello.key + '", oauth_token="' + config.trello.token + '"',
             },
             body: {
-                name: refs
-                    ? "Resolves " + refs.title
-                    : "Untitled",
+                name: ((refs) => {
+                    switch (refs?.type) {
+                        case "redmine":
+                            return "refs #" + refs.number + " " + refs.title
+                        case "github_issue":
+                            return "resolves " + refs.title
+                        default:
+                            return "untitled"
+                    }
+                })(refs),
                 desc: payload.refs.url,
                 due: payload.refs.dueDate,
                 idList: config.trello.idList,

@@ -118,9 +118,16 @@ class CreatedTask implements Task {
                 "Authorization": "token " + config.github.token,
             },
             body: {
-                title: refs
-                    ? "Resolves " + refs.title
-                    : "Untitled",
+                title: ((refs) => {
+                    switch (refs?.type) {
+                        case "redmine":
+                            return "refs #" + refs.number + " " + refs.title
+                        case "github_issue":
+                            return "resolves " + refs.title
+                        default:
+                            return "untitled"
+                    }
+                })(refs),
                 body: ejs.render(template, payload),
                 head: payload.head,
                 base: payload.base,
