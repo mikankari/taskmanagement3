@@ -7,7 +7,7 @@ Vue.createApp {
         isShownCreatingModal: false
         isShownReviewModal: false
         isShownOtherModal: false
-        checkedoutIndex: -1
+        checkedoutTask: null
     }
     methods: {
         reload: ->
@@ -17,7 +17,7 @@ Vue.createApp {
 
         checkout: (task) ->
             window.ipcRenderer.invoke "checkout", Vue.toRaw task
-                .then => @checkedoutIndex = @tasks.indexOf task
+                .then => @checkedoutTask = task
                 .catch (error) -> window.alert error
 
         openIssue: (task) ->

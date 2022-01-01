@@ -37,11 +37,11 @@ html(lang="en")
                             td
                                 span {{ item.title }}
                                 | &nbsp;
-                                span(v-if="index == checkedoutIndex").label.label-info HEAD
-                                | &nbsp;
                                 template(v-if="item.refs")
                                     span(v-if="item.refs.priority === 1").label.label-warning Higher
                                     span(v-if="item.refs.priority === 2").label.label-important Urgent
+                                | &nbsp;
+                                span(v-if="item === checkedoutTask").label.label-info HEAD
                             td
                                 span(v-if="item.todos[item.currentIndex]") {{ item.todos[item.currentIndex].name }}
                                 span(v-else) ＼ｵﾜﾀ／
