@@ -1,7 +1,7 @@
 {
   "name": "taskmanagement",
   "version": "3.0.0",
-  "description": "",
+  "description": "チケット駆動開発のためのマルチタスク管理・自動化ツール",
   "main": "main.js",
   "scripts": {
     "postinstall": "./postinstall.sh",
