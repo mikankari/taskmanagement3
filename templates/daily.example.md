@@ -20,6 +20,14 @@ var renderTodos = function (task) {
 
 ## ✅ やったこと・⬜️ やること
 
+### 予定
+
+<!--
+ここに Google カレンダーの埋め込みコードとか。
+訪問者が見れるために、訪問者へのカレンダーの共有設定が必要です。
+https://support.google.com/calendar/answer/41207
+-->
+
 ### 実装
 
 <%
