@@ -6,11 +6,11 @@ html(lang="en")
         link(rel="stylesheet", href="./bootstrap.min.css")
         script(src="./vue.global.prod.js")
         script(src="./index.js" defer)
-    body
+    body(style="padding-top: 40px;")
         #taskmanagement
             .bottom-panel.vert-resizable.top-resizer
-                .toolbar.simple-toolbar-layout
-                    div
+                .navbar.navbar-fixed-top
+                    .pull-left
                         .btn-group
                             button(@click="isShownCreatingModal = true").btn.small Add creating
                             button(@click="isShownReviewModal = true").btn.small Add review
@@ -18,7 +18,7 @@ html(lang="en")
                         .btn-group
                             button(@click="reload").btn.small Reload
                             button(@click="isShowAll = ! isShowAll").btn.small Show all
-                    div(style="position: absolute; right: 0; top: 0;")
+                    .pull-right
                         .btn-group
                             button.btn.small(@click="copy") Copy
                             button.btn.small(@click="writeDiary") Write diary
