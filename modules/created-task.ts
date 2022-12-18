@@ -95,6 +95,7 @@ class CreatedTask implements Task {
 
     static async create(payload: { repo: string, refs: { url: string }, head: string, base: string }): Promise<CreatedTask> {
         const exec = (command: string): void => util.promisify(childProcess.exec)(command, { cwd: config.directories[payload.repo] })
+        await exec("git diff --cached --exit-code")
         await exec("git fetch")
         await exec("git checkout --no-track -b " + payload.head + " origin/" + payload.base)
         await exec("git commit --allow-empty -m \"Draft 用の空コミット\"")
