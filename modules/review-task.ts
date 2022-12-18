@@ -48,7 +48,7 @@ class ReviewTask implements Task {
         this.head = pr.head.ref
         this.base = pr.base.ref
 
-        const refsMatch: RegExpMatchArray = pr.body.match(/https?\:\/\/\S+/)
+        const refsMatch: RegExpMatchArray = pr.body?.match(/https?\:\/\/\S+/)
         this.refs = await refer(refsMatch?.[0])
 
         const reviews: any[] = await request({
