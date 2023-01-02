@@ -1,6 +1,6 @@
 {
   "name": "taskmanagement",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "チケット駆動開発のためのマルチタスク管理・自動化ツール",
   "main": "main.js",
   "scripts": {
